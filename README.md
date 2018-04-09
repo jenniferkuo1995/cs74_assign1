@@ -14,15 +14,15 @@ import numpy as np
 X = np.delete(myData, -1, axis = 1) # select all features
 y = myData[:, -1] == 1 #create binary DV
 ```
+For each model, I used K-fold cross validation and obtained the following evaluative measures: precision, recall, F1 score, and AUROC curve.  
 
-Then, I tested each model using K-fold cross validation. I specifically used stratified K-folds, which preserves the proportions of each class.
-
+For cross validation, I specifically used stratified K-folds, which preserves the proportions of each class. The data was partitioned into 5 folds.
 ```
 from sklearn.model_selection import StratifiedKFold
 skf = StratifiedKFold(n_splits = 5, random_state = 42)
 ```
+To obtain evaluative measures, I looped through the five subsamples. Of the 5 subsamples, a single subsample is retained as the validation data for testing the model, and the evaluative measures I listed above (precision, recall, etc) were obtained. Then, the AUROC was plotted. In the code below, I used these steps to evaluate Bernoulli Naive Bayes. Similar steps were performed to evaluate Gaussian and Multinomial Naive Bayes.
 
-For each model, I got the following evaluative measures: precision, recall, F1 score, and AUROC curve.  
 ```
 # accuracy measures: Precision, recall
     precision = []
@@ -34,7 +34,7 @@ For each model, I got the following evaluative measures: precision, recall, F1 s
 
     j = 0
     for train_index, test_index in skf.split(X, y):
-        C = fn()
+        C = BernoulliNB()
         preds = C.fit(X[train_index], y[train_index]).predict(X[test_index])
         probas = C.fit(X[train_index], y[train_index]).predict_proba(X[test_index])
         measures = precision_recall_fscore_support(y[test_index], preds)
