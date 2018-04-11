@@ -60,6 +60,7 @@ print(r'Mean precision = %0.2f +/- %0.2f' % (np.mean(precisions), np.std(precisi
 print(r'Mean recall = %0.2f +/- %0.2f' % (np.mean(recalls), np.std(recalls)))
 print('\n')
 ```
+
 I ran testModel three times, testing the three variants of NB (BernoulliNB, GaussianNB, and MultinomialNB). The following results were obtained. BernoulliNB gave me the best results, so it is what I used for subsequent steps of the assignment.
 
 ```
@@ -85,49 +86,46 @@ Mean recall = 0.77 +/- 0.08
 In this section, I have code to do the following: 1) data loading 2) training 3) testing, 4) saving the results.
 
 ### Functions
-I have two functions train(data) and predict(C, row), 
+I have two functions train(data) and predict(C, row), which abstract out the respective steps.
+In train(filename), I read the training data as a nump ndarray (using the numpy function genfromtxt()).
 ```
-Give an example
+myData = np.genfromtxt( filename, delimiter = ',', dtype=np.float64) #read training data
+```
+I then split this data into two components, which were X (the features used) and y (the DV). With this data, I trained and returned a classifier using BernoulliNB. 
+
+```
+return BernoulliNB().fit(X, y)
 ```
 
-### And coding style tests
+The function predict(C, row) takes a classifier and a row, and uses the classifier to predict either 0 or 1. 
+```
+def predict(C, row):
+    return(C.predict([row]))
+```
+### Implementing functions
 
 Explain what these tests test and why
 
 ```
-Give an example
+myclf = train('train.csv')
 ```
 
-## Deployment
+```
+testData = np.genfromtxt( 'test1.csv', delimiter = ',', dtype=np.float64)
 
-Add additional notes about how to deploy this on a live system
+```
 
-## Built With
+```
+predictions = np.zeros(shape =(testData.shape[0], 1))
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+for i in range(0, testData.shape[0]):
+    predictions[i,0] = predict(myclf, testData[i,:])
+```
 
-## Contributing
+### Saving results
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+```
+output = np.hstack((testData, predictions)) #append predicted DVs as the last column
+np.savetxt("F002341_test1_result.csv", output, delimiter = ",", fmt='%10.5f') # write results as csv
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
+```
