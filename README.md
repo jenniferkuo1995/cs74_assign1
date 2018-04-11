@@ -104,17 +104,18 @@ def predict(C, row):
 ```
 ### Implementing functions
 
-Explain what these tests test and why
+Using my train() function, I built a classifier.
 
 ```
 myclf = train('train.csv')
 ```
 
+Next, I loaded test1.csv as a numpy ndarray.
 ```
 testData = np.genfromtxt( 'test1.csv', delimiter = ',', dtype=np.float64)
 
 ```
-
+I initialized an empty array called predictions. I then looped through the test data, got predicted DVs for each row (using the predict function), and put these into predictions.
 ```
 predictions = np.zeros(shape =(testData.shape[0], 1))
 
@@ -123,7 +124,7 @@ for i in range(0, testData.shape[0]):
 ```
 
 ### Saving results
-
+To output my data, I first appended my predictions to the last column of test1.csv. The resulting ndarray was then output as a csv file using the numpy function savetxt.
 ```
 output = np.hstack((testData, predictions)) #append predicted DVs as the last column
 np.savetxt("F002341_test1_result.csv", output, delimiter = ",", fmt='%10.5f') # write results as csv
