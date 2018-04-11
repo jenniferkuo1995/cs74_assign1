@@ -5,83 +5,51 @@ CS 74
 
 ## 1) Evaluating different variants of Naive Bayes
 
-For this assignment, I tested and evaluated three versions of Naive Bayes (Bernoulli, Gaussian, and Multinomial). 
+For this assignment, I tested and evaluated three versions of Naive Bayes (Bernoulli, Gaussian, and Multinomial). The process for evaluating the three variants was abstracted out into a function called testModel. 
+
+In this function, I first split my data into X (features tested) and y (the DV, transformed to
 
 To do this, I first split my data into X and y. X includes all the features being tested. y has the DV, transformed to be a binary boolean value.
 
 ```
-import numpy as np
 X = np.delete(myData, -1, axis = 1) # select all features
 y = myData[:, -1] == 1 #create binary DV
 ```
 For each model, I used K-fold cross validation and obtained the following evaluative measures: precision, recall, F1 score, and AUROC curve.  
 
-For cross validation, I specifically used stratified K-folds, which preserves the proportions of each class. The data was partitioned into 5 folds.
+For cross-validation, data was partitioned into 5 folds using stratifiedKFold, which preserves the proportions of each class.
+
 ```
-from sklearn.model_selection import StratifiedKFold
 skf = StratifiedKFold(n_splits = 5, random_state = 42)
 ```
+
 To obtain evaluative measures, I looped through the five subsamples. Of the 5 subsamples, a single subsample is retained as the validation data for testing the model, and the evaluative measures I listed above (precision, recall, etc) were obtained. Then, the AUROC was plotted. In the code below, I used these steps to evaluate Bernoulli Naive Bayes. Similar steps were performed to evaluate Gaussian and Multinomial Naive Bayes.
 
 ```
-# accuracy measures: Precision, recall
-    precision = []
-    recall = []
-    f_scores = []
-    tprs = []
-    aucs = []
-    mean_fpr = np.linspace(0, 1, 100)
+precisions = []
+recalls = []
+f_scores = []
+aucs = []
 
-    j = 0
-    for train_index, test_index in skf.split(X, y):
-        C = BernoulliNB()
+# loop through each fold.
+j = 0
+for train_index, test_index in skf.split(X, y):
+        C = model() 
+        
+        # fit the classifier to the data, excluding one of the subsets. 
+        # then, test this classifier on the excluded subset.
         preds = C.fit(X[train_index], y[train_index]).predict(X[test_index])
         probas = C.fit(X[train_index], y[train_index]).predict_proba(X[test_index])
+        
+        # obtain different evaluative measures
         measures = precision_recall_fscore_support(y[test_index], preds)
-        
-        precision.append(measures[0])
-        recall.append(measures[1])
+        precisions.append(measures[0])
+        recalls.append(measures[1])
         f_scores.append(measures[2])
-        # Compute ROC curve and area under the curve
-        fpr, tpr, thresholds = roc_curve(y[test_index], probas[:, 1])
-        tprs.append(interp(mean_fpr, fpr, tpr))
-        tprs[-1][0] = 0.0
-        roc_auc = auc(fpr, tpr)
-        aucs.append(roc_auc)
-        plt.plot(fpr, tpr, lw=1, alpha=0.3,
-                 label='ROC fold %d (AUC = %0.2f)' % (j, roc_auc))
-        j += 1
+        aucs.append(roc_auc_score(y[test_index], probas[:, 1]))
 
-        plt.plot([0, 1], [0, 1], linestyle = '--', lw=2, color='r', alpha = .8)
-        
-    #### Plotting AUROC
-    mean_tpr = np.mean(tprs, axis = 0)
-    mean_tpr[-1] = 1.0
-    mean_auc = auc(mean_fpr, mean_tpr)
-    std_auc = np.std(aucs)
-    plt.plot(mean_fpr, mean_tpr, color='b',
-             label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
-             lw=2, alpha=.8)
-    std_tpr = np.std(tprs, axis=0)
-    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
-                     label=r'$\pm$ 1 std. dev.')
-    plt.xlim([-0.05, 1.05])
-    plt.ylim([-0.05, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="right")
-    plt.show()
-
-    precision = np.ndarray((5, 2), buffer=np.array(precision))
-    recall = np.ndarray((5, 2), buffer=np.array(recall))
-    f_scores = np.ndarray((5, 2), buffer=np.array(f_scores))
-    return precision, recall, f_scores
+        j += 1   
 ```
-
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Running the tests
 
