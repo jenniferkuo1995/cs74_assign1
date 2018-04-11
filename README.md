@@ -23,7 +23,7 @@ For cross-validation, data was partitioned into 5 folds using stratifiedKFold, w
 skf = StratifiedKFold(n_splits = 5, random_state = 42)
 ```
 
-To obtain evaluative measures, I looped through the five subsamples. Of the 5 subsamples, a single subsample is retained as the validation data for testing the model, and the evaluative measures I listed above (precision, recall, etc) were obtained. Then, the AUROC was plotted. In the code below, I used these steps to evaluate Bernoulli Naive Bayes. Similar steps were performed to evaluate Gaussian and Multinomial Naive Bayes.
+To obtain evaluative measures, I looped through the five subsamples. In each iteration, a single subsample is retained as the validation data. The evaluative measures I listed above (precision, recall, etc) were obtained for each iteration.
 
 ```
 precisions = []
@@ -51,14 +51,41 @@ for train_index, test_index in skf.split(X, y):
         j += 1   
 ```
 
-## Running the tests
+I then took the means and standard deviations of each evaluative measure and printed these.
 
-Explain how to run the automated tests for this system
+```
+## obtain mean values of different evaluative measures, and print them out. 
+print(r'Mean AUC = %0.2f +/- %0.2f' % (np.mean(aucs), np.std(aucs)))
+print(r'Mean precision = %0.2f +/- %0.2f' % (np.mean(precisions), np.std(precisions)))
+print(r'Mean recall = %0.2f +/- %0.2f' % (np.mean(recalls), np.std(recalls)))
+print('\n')
+```
+I ran testModel three times, testing the three variants of NB (BernoulliNB, GaussianNB, and MultinomialNB). The following results were obtained. BernoulliNB gave me the best results, so it is what I used for subsequent steps of the assignment.
 
-### Break down into end to end tests
+```
+Bernoulli Naive Bayes:
+Mean AUC = 0.95 +/- 0.01
+Mean precision = 0.88 +/- 0.02
+Mean recall = 0.87 +/- 0.06
 
-Explain what these tests test and why
 
+Gaussian Naive Bayes:
+Mean AUC = 0.95 +/- 0.01
+Mean precision = 0.83 +/- 0.13
+Mean recall = 0.85 +/- 0.11
+
+
+Multinomial Naive Bayes:
+Mean AUC = 0.83 +/- 0.01
+Mean precision = 0.77 +/- 0.04
+Mean recall = 0.77 +/- 0.08
+```
+
+## 2) Data loading, training, testing
+In this section, I have code to do the following: 1) data loading 2) training 3) testing, 4) saving the results.
+
+### Functions
+I have two functions train(data) and predict(C, row), 
 ```
 Give an example
 ```
